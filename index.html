@@ -285,24 +285,24 @@
 					var p = Math.max(0, Math.min(100, Math.round(percentage)));
 					bar.style.transform = "scaleX(" + (p / 100) + ")";
 					pct.textContent = p + "%";
-					// Deliberately NOT hiding at 100 here: the tracked total
-					// can momentarily read 100 early in the download (before
-					// the archive registers), which faded the splash ~20 s
-					// before the game was ready. Module.calledRun below is
-					// the only trigger.
+					// Deliberately NOT hiding at 100 here, and NOT on
+					// Module.calledRun either: calledRun flips true when the
+					// wasm RUNTIME starts, which is ~25% into the download --
+					// both faded the splash long before the game was ready.
 				});
 			}
-			// Hide the splash only when the engine is actually running.
-			window.addEventListener("load", function () {
-				var tries = 0;
-				var iv = setInterval(function () {
-					tries++;
-					if ((window.Module && Module.calledRun) || tries > 1200) {
-						clearInterval(iv);
-						finish();
-					}
-				}, 250);
-			});
+			// dmloader's own definition of done: it calls
+			// ProgressView.removeProgress() when everything has loaded.
+			// That is the one reliable hide trigger.
+			if (typeof ProgressView !== "undefined") {
+				var origRemove = ProgressView.removeProgress.bind(ProgressView);
+				ProgressView.removeProgress = function () {
+					origRemove();
+					finish();
+				};
+			}
+			// Backstop only: never strand the splash forever.
+			setTimeout(finish, 300000);
 		})();
 	</script>
 	<script id='engine-start' type='text/javascript'>
