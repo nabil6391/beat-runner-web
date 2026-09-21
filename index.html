@@ -207,6 +207,25 @@
 	   owns all of its CSS instead. */
 	.canvas-app-progress { display: none !important; }
 	.canvas-app-canvas-container { background: none; }
+
+	/* Footer chrome (previously styled by the removed inline CSS) */
+	.buttons-background {
+		position: absolute;
+		bottom: 8px;
+		left: 0; right: 0;
+		display: flex;
+		justify-content: space-between;
+		padding: 0 14px;
+		font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+		font-size: 12px;
+		pointer-events: none;
+	}
+	.buttons-background .button, .buttons-background .link {
+		color: rgba(255,255,255,0.75);
+		pointer-events: auto;
+	}
+	.buttons-background .button { cursor: pointer; }
+	.buttons-background a { color: rgba(255,255,255,0.9); }
 	</style>
 </head>
 
