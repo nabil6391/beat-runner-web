@@ -9,6 +9,7 @@
 
 	<title>Beat Runner</title>
 	<link rel="icon" type="image/webp" href="data:image/webp;base64,UklGRsoFAABXRUJQVlA4IL4FAABwGACdASowADAAAUAmJbACdMoR9V5R+OnsCUr+Zfe/aESI9nU4D7o98l+1/qA/Xr9lfeA/uX6Z+4j0AP1a6wD9lfYA/Xj01v3G+BX9uP2v+An9qsAE3K4guInzJGDOA+lP7Pyk78fep/IeS/ylHpeqbUawOcKZ5B5+vVW/lPGt9E+wL+tX/S9cb2Vei/+2h2Y0EpT4BpIUXuiLRWy7D6beKQxR5XL2zDh8Qn8sG3Apzgr0pwr39UhqXmcUZlm7zW17TA5d6tZ46YmXAAAA/v7ogPgh7Mq4Qpnc5/DeF30yA3R+bk0dtCaPTgvwVBmt4k3KiCTA62UfB9xCIdz/DxVFGLRe7UIJ5sKbj46MT9j6kVnru56NCE3U/WUgj4x7yVbXz0G1LP7IA85/+e4H8ZCPIC2JHqu+6lYKl8WPIoadyLZriVgwLVZh2K3u1vcmYmZerESF5nqCyb1D+5KD+8y0/6Lb4/eGSXz9bcXnqcMfChqXFFtFBUhEuxbFHeLyO4LQQkt8hDzuIs0nh02kw1JHCgShEFSrZh362PFqFQp/J93kcKKHsLtw2wlWKj/Xx4z/5b9vqY88fWEfe3pDBaAdXrQPNIMV7DODKqCyC7S4gHnqwqlmUdJQ5B46j9A6wqZxb4gS2rHjfuZNTuv3v7Hp3oLBhrlVIEaf10aurMkCElrnfbrR7QXdlQDkGTo7VeIT+9Wy5Io44Z5M4O/r0PX+PVfe6X2IUSnBheDEc3jWEMTNdYQA0utfbEkID5FqT99lnldgegbjl5i4jPznzuSW0+3d497X5t55igOF8auNYMT3e1ff1TbIKNsUhafaU0tFBc1bbZXyMCwCPWM1qzTi/AsLYqkBWxweLQFIHeIitX7zliFqlNaJ+chyWfx5RLfd88pNNm6XBby+SdhpbsjGnuVd5oa6S//MRt5xxEiMNa6iimkRgoxunXQjWVqNEC9E0QOG7AwUtbhzac92iVeDXRIZtSbDBmpsV6QVVLDWG+MctU+OT0/oMvZy59cApWSS67S70Qf6nMLNRHEb9qJcXjSCCos/1J8dgHjv2/sfeNDevFldo+YlPm+NfT159oOv01+TFjK3GyMdwHjKG9YIDQoWtsVaR2NPYHNf4OcutqtZWEQUiH0noknmHCv8ud9qZeMt3NK1kDmRiqWl//fkK/qUdJmJDdpCVtVFqkQ8OpMiTJgI8Kld/fNh7iMo9FjYf0Deqb6/Jih+aN5QfuEesFE0WDTFyn73BAwjw0B8LqVSMivSRs+eXI8octhGIPQXxe7hy8ig3Fzr2S78wGqx11Z96q++GEve+ca7yR8qWh8Wen6ufxmasMXLuPHepd1oR55Du6X8T9L/9/xjvTXmxt3wfx4A7odyBb6UGaylwjKnd2V8CjOfOWX//BeXLRAf9Q9KLYowcNILboMDWCD9MdtEuo1JUJYxCQerqz20Jbe8TD7XH2t9390RlRk0/5b14imP5VqDJldQ5X1SdOrkvW+YRmGmL1FSs6ao5x4HcNi/Pz5+Yp19qNCR/eF/uuyaPtjylChFIBi/l15KWxM7cg6mlZONrrU70rraH33y3M155W6p2Py1Ti5FSwq7xnYRhKFg2JeHPprXwqrBKSspNQzcRw5tRopjsMt8lfg161GNRd/t4BGoqVushJU27n+rOaUym38Bcm30qawz7cab9t/rVFEOG6gsj9rRc3aFCZSTjsFG4IGPWIA1UuRTG/pCbmNsKhiAdJFeqBo9VCx+GpxNVTWqeZtbl1Po+tbR1UhJist5YDAAhIoo0DYd3yaJm/DH/NSDT48GGGJG+6rtl94MXFefYyKz7eyqUZqP7Pr2FgZQ3RgipAFdszMpFTg08SviAl3G55zyzTqvkOE1/pXp0HJQfseqL7icW5YVlo9VLiQBMEnkfy9i0/8tAGZ/RKF7LBLBZDgmGLCMXKVbit0ENij8wsYrL14AAAA=">
+	<script>try { fetch("world.zip"); } catch (e) {}</script>
 	<style type='text/css'>
 	body {
 	
@@ -245,29 +246,38 @@
 				// loading screen.
 				setTimeout(function () { splash.classList.add("br-hidden"); }, 900);
 			}
+			// One continuous bar for the whole journey: the base archive is
+			// the first 15% (it is ~4 MB of ~21), the streamed world pack is
+			// the rest, reported by the game via window.__brStream (wired to
+			// http.request report_progress in main.script).
+			var BASE_SHARE = 0.15;
 			if (typeof ProgressUpdater !== "undefined") {
 				ProgressUpdater.addListener(function (percentage) {
-					var p = Math.max(0, Math.min(100, Math.round(percentage)));
-					bar.style.transform = "scaleX(" + (p / 100) + ")";
-					pct.textContent = p + "%";
-					// Deliberately NOT hiding at 100 here, and NOT on
-					// Module.calledRun either: calledRun flips true when the
-					// wasm RUNTIME starts, which is ~25% into the download --
-					// both faded the splash long before the game was ready.
+					var p = Math.max(0, Math.min(100, percentage));
+					bar.style.transform = "scaleX(" + (p / 100 * BASE_SHARE) + ")";
+					pct.textContent = Math.round(p * BASE_SHARE) + "%";
+					// NOT hiding at 100, and NOT on Module.calledRun either:
+					// calledRun flips true when the wasm RUNTIME starts
+					// (~25% into the download).
 				});
 			}
+			window.__brStream = function (received, total) {
+				if (!total) return;
+				var f = BASE_SHARE + (1 - BASE_SHARE) * Math.min(1, received / total);
+				bar.style.transform = "scaleX(" + f + ")";
+				pct.textContent = Math.round(f * 100) + "%";
+			};
 			// The game itself signals readiness: main.script calls
-			// window.__brReady() once the streamed world collection is
-			// mounted and built. Base-archive completion (dmloader's
-			// ProgressView.removeProgress) only flips the splash into a
-			// "warming up" state -- the world zip is still downloading.
+			// window.__brReady() once the streamed world is mounted and
+			// built. Base-archive completion only updates the label -- the
+			// world pack is still downloading.
 			window.__brReady = finish;
 			if (typeof ProgressView !== "undefined") {
 				var origRemove = ProgressView.removeProgress.bind(ProgressView);
 				ProgressView.removeProgress = function () {
 					origRemove();
-					bar.style.transform = "scaleX(1)";
-					pct.textContent = "warming up\u2026";
+					bar.style.transform = "scaleX(" + BASE_SHARE + ")";
+					pct.textContent = "loading world\u2026";
 				};
 			}
 			// Backstop only: never strand the splash forever.
