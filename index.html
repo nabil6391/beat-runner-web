@@ -26,8 +26,10 @@
 		align-items: center;
 		justify-content: center;
 		overflow: hidden;
-		/* The game's own sunset: night purple -> violet -> magenta -> horizon orange */
-		background: linear-gradient(180deg, #2b1a59 0%, #783894 45%, #e05799 72%, #ff995c 100%);
+		/* Solid deep purple so the letterbox frame around the canvas is
+		   uniform (a gradient here peeks out as an orange strip below the
+		   fitted canvas). The splash carries its own sunset gradient. */
+		background: #24124a !important;
 	}
 
 	.canvas-app-container:-webkit-full-screen {
