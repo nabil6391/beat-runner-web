@@ -273,6 +273,7 @@ max_time_step = 0.033333
 [font]
 
 [native_extension]
+app_manifest = /beat_runner.appmanifest
 
 [event]
 event_mode = pcall
