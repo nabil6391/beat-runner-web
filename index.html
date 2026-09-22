@@ -225,6 +225,53 @@
 		if (typeof globalThis === 'undefined') {
 			window.globalThis = window;
 		}
+		// TAP STRETCHER: the engine samples mouse state once per frame, so a
+		// trackpad tap-to-click (down+up within a few ms) produces NO input
+		// action at all -- verified by instrumenting the Lua input handlers:
+		// instant clicks arrive as zero events while slow clicks show the
+		// full press/move/release sequence. Buttons therefore ignore taps.
+		// Fix: intercept a too-fast mouseup/touchend at window capture
+		// (registered before Emscripten's handlers) and re-dispatch it a
+		// frame-and-a-bit later so every press spans at least two frames.
+		(function () {
+			var MIN = 45; // ms -- > one frame even at 30 fps hitches
+			var lastDown = 0;
+			window.addEventListener("mousedown", function () {
+				lastDown = performance.now();
+			}, true);
+			window.addEventListener("mouseup", function (e) {
+				var dt = performance.now() - lastDown;
+				if (e.isTrusted && dt < MIN) {
+					e.stopImmediatePropagation();
+					var clone = new MouseEvent("mouseup", e);
+					var target = e.target;
+					setTimeout(function () {
+						target.dispatchEvent(clone);
+					}, Math.max(1, MIN - dt));
+				}
+			}, true);
+			var lastTouch = 0;
+			window.addEventListener("touchstart", function () {
+				lastTouch = performance.now();
+			}, true);
+			window.addEventListener("touchend", function (e) {
+				var dt = performance.now() - lastTouch;
+				if (e.isTrusted && dt < MIN) {
+					e.stopImmediatePropagation();
+					var target = e.target;
+					var touches = e.changedTouches;
+					setTimeout(function () {
+						try {
+							target.dispatchEvent(new TouchEvent("touchend", {
+								bubbles: true, cancelable: true,
+								touches: [], targetTouches: [],
+								changedTouches: Array.prototype.slice.call(touches),
+							}));
+						} catch (err) { /* older browsers: give up quietly */ }
+					}, Math.max(1, MIN - dt));
+				}
+			}, true);
+		})();
 	</script>
 	<script id='engine-loader' type='text/javascript' src="dmloader.js"></script>
 	<script id='engine-setup' type='text/javascript'>
